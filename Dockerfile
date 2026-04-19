@@ -32,5 +32,5 @@ RUN mkdir -p uploads/vectors
 EXPOSE 8000
 
 # 6. Start the application
-# We use the $PORT variable provided by Railway
-CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT}
+CMD ["python", "-m", "backend.main"]
+

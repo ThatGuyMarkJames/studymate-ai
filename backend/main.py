@@ -64,10 +64,14 @@ def health():
 
 if __name__ == "__main__":
     import uvicorn
+    # Railway provides the port via the PORT environment variable
+    port = int(os.getenv("PORT") or os.getenv("APP_PORT") or 8000)
+    
     uvicorn.run(
         "backend.main:app",
         host    = os.getenv("APP_HOST", "0.0.0.0"),
-        port    = int(os.getenv("APP_PORT", 8000)),
-        reload  = True,
+        port    = port,
+        reload  = False,  # Disable reload in production
         workers = 1,
     )
+
