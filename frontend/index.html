@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="StudyMate AI — Your intelligent study companion. AI-powered chat, flashcards, quizzes, and DSA practice for college students."/>
+  <meta name="theme-color" content="#080b12"/>
+  <title>StudyMate AI — Intelligent Study Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/main.css"/>
+  <!-- Inline SVG gradient for pomodoro ring -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="pomo-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#6366f1"/>
+        <stop offset="100%" stop-color="#8b5cf6"/>
+      </linearGradient>
+    </defs>
+  </svg>
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-bg">
+      <div class="auth-orb orb1"></div>
+      <div class="auth-orb orb2"></div>
+      <div class="auth-orb orb3"></div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">StudyMate <span class="logo-ai">AI</span></span>
+      </div>
+      <p class="auth-tagline">Your intelligent study companion</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+      <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="you@university.edu" required/>
+        </div>
+        <div class="field-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required/>
+        </div>
+        <div id="login-error" class="form-error hidden"></div>
+        <button type="submit" class="btn-primary btn-full" id="login-btn"><span>Sign In</span></button>
+      </form>
+      <form id="signup-form" class="auth-form hidden" onsubmit="handleSignup(event)">
+        <div class="field-row">
+          <div class="field-group">
+            <label>Username</label>
+            <input type="text" id="signup-username" placeholder="johndoe" required/>
+          </div>
+          <div class="field-group">
+            <label>Full Name</label>
+            <input type="text" id="signup-name" placeholder="John Doe"/>
+          </div>
+        </div>
+        <div class="field-group">
+          <label>Email</label>
+          <input type="email" id="signup-email" placeholder="you@university.edu" required/>
+        </div>
+        <div class="field-group">
+          <label>Password</label>
+          <input type="password" id="signup-password" placeholder="Min 6 characters" required/>
+        </div>
+        <div id="signup-error" class="form-error hidden"></div>
+        <button type="submit" class="btn-primary btn-full" id="signup-btn"><span>Create Account</span></button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">StudyMate<span class="logo-ai">AI</span></span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+          <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-page="study" onclick="navigateTo('study')">
+          <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <span>Study Chat</span>
+        </button>
+        <button class="nav-item" data-page="flashcards" onclick="navigateTo('flashcards')">
+          <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+          <span>Flashcards</span>
+        </button>
+        <button class="nav-item" data-page="quiz" onclick="navigateTo('quiz')">
+          <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+          <span>Self Assessment</span>
+        </button>
+        <button class="nav-item" data-page="dsa" onclick="navigateTo('dsa')">
+          <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+          <span>DSA Practice</span>
+        </button>
+        <button class="nav-item" data-page="notes" onclick="navigateTo('notes')">
+          <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+          <span>My Notes</span>
+        </button>
+      </nav>
+
+      <div class="pomodoro-widget">
+        <div class="pomodoro-label">
+          <span id="pomo-mode-label">Focus Session</span>
+          <span id="pomo-session-count" class="pomo-sessions">0 sessions</span>
+        </div>
+        <div class="pomodoro-display">
+          <svg class="pomo-ring" viewBox="0 0 60 60">
+            <circle class="pomo-track" cx="30" cy="30" r="26"/>
+            <circle id="pomo-progress" class="pomo-fill" cx="30" cy="30" r="26"
+              stroke-dasharray="163.4" stroke-dashoffset="0"/>
+          </svg>
+          <span id="pomo-time" class="pomo-time">25:00</span>
+        </div>
+        <div class="pomodoro-controls">
+          <button class="pomo-btn" id="pomo-start-btn" onclick="togglePomodoro()">▶</button>
+          <button class="pomo-btn pomo-reset" onclick="resetPomodoro()">↺</button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-pill">
+          <div class="user-avatar" id="sidebar-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-name">User</div>
+            <div class="user-level" id="sidebar-level">Level 1</div>
+          </div>
+          <button class="logout-btn" onclick="logout()" title="Sign out">⏻</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div>
+            <h1 id="dash-greeting">Welcome back!</h1>
+            <p class="page-sub">Here's what's happening with your studies.</p>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div>
+              <span class="stat-val" id="dash-subjects">0</span>
+              <div class="stat-label">Subjects</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📄</div>
+            <div>
+              <span class="stat-val" id="dash-docs">0</span>
+              <div class="stat-label">Documents</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div>
+              <span class="stat-val" id="dash-streak">0</span>
+              <div class="stat-label">Day Streak</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div>
+              <span class="stat-val" id="dash-quizzes">0</span>
+              <div class="stat-label">Quizzes Done</div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3>Recent Subjects</h3>
+              <button class="btn-ghost" onclick="navigateTo('study')">View all →</button>
+            </div>
+            <div id="dash-recent-subjects" class="subj-list"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h3>Quiz Performance</h3>
+            </div>
+            <div id="dash-quiz-stats" class="quiz-summary"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-study" class="page hidden">
+        <div class="page-header">
+          <h1>Study Chat</h1>
+          <p class="page-sub">Chat with your documents using AI.</p>
+        </div>
+        <div class="study-layout">
+          <div class="study-sidebar">
+            <div class="study-sidebar-top">
+              <h3>Subjects</h3>
+              <button class="btn-icon" onclick="openNewSubjectModal()" title="New Subject">＋</button>
+            </div>
+            <div id="subject-list" class="subject-list"></div>
+          </div>
+          <div class="study-main" style="grid-area:main;display:flex;flex-direction:column;overflow:hidden">
+            <div id="study-empty" class="study-empty">
+              <div class="empty-icon">📂</div>
+              <p>Select a subject to start chatting</p>
+            </div>
+            <div id="study-chat" class="study-chat hidden">
+              <div class="chat-header">
+                <div class="chat-subject-info">
+                  <div class="chat-subject-dot" id="chat-subject-dot"></div>
+                  <span id="chat-subject-name">Subject</span>
+                </div>
+                <div class="chat-header-actions">
+                  <button class="btn-ghost" onclick="openNotesPanel()" title="Notes">🗒 Notes</button>
+                  <button class="btn-ghost" onclick="openUploadModal()" title="Upload document">📎 Upload</button>
+                  <button class="btn-ghost btn-danger" onclick="clearChatHistory()">Clear chat</button>
+                </div>
+              </div>
+              <div id="chat-messages" class="chat-messages"></div>
+              <div class="chat-input-area">
+                <textarea id="chat-input" placeholder="Ask anything about your study material…"
+                  onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+                <button class="btn-send" id="chat-send-btn" onclick="sendChatMessage()">↑</button>
+              </div>
+            </div>
+          </div>
+          <div id="notes-panel" class="notes-panel hidden">
+            <div class="notes-panel-header">
+              <h3>📝 Notes</h3>
+              <button class="btn-icon" onclick="addNote()">＋</button>
+              <button class="btn-ghost notes-close" onclick="closeNotesPanel()">✕</button>
+            </div>
+            <div id="notes-list" class="notes-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-flashcards" class="page hidden">
+        <div class="page-header">
+          <h1>Flashcards</h1>
+          <p class="page-sub">AI-generated flashcards from your documents.</p>
+        </div>
+        <div class="flashcard-layout">
+          <div class="fc-sidebar">
+            <div class="fc-sidebar-top">
+              <h3>Generate Deck</h3>
+            </div>
+            <div class="fc-generate-form">
+              <div class="field-group">
+                <label>Subject</label>
+                <select id="fc-subject-select" onchange="loadDecksForSubject()">
+                  <option value="">Select a subject…</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Number of cards</label>
+                <input type="number" id="fc-num-cards" value="10" min="3" max="30"/>
+              </div>
+              <button class="btn-primary btn-full" onclick="generateDeck()" id="fc-gen-btn">
+                <span>✨ Generate</span>
+              </button>
+            </div>
+            <div class="fc-decks-section">
+              <h4>Saved Decks</h4>
+              <div id="fc-deck-list" class="fc-deck-list"></div>
+            </div>
+          </div>
+          <div class="fc-main">
+            <div id="fc-empty" class="study-empty">
+              <div class="empty-icon">🃏</div>
+              <p>Generate or select a deck to start reviewing</p>
+            </div>
+            <div id="fc-review" class="fc-review hidden">
+              <div class="fc-review-header">
+                <span id="fc-deck-title" class="fc-deck-title-text">Deck</span>
+                <div class="fc-progress-row">
+                  <span id="fc-card-counter">1 / 10</span>
+                  <span id="fc-mastered-count" class="fc-mastered-badge">0 mastered</span>
+                </div>
+              </div>
+              <div class="fc-card-area">
+                <button class="fc-nav-btn" onclick="fcPrev()">‹</button>
+                <div id="fc-card" class="fc-card" onclick="flipCard()">
+                  <div class="fc-card-inner" id="fc-card-inner">
+                    <div class="fc-card-front">
+                      <div class="fc-card-label">Question</div>
+                      <div class="fc-card-text" id="fc-front-text"></div>
+                      <div class="fc-card-tag" id="fc-tag"></div>
+                    </div>
+                    <div class="fc-card-back">
+                      <div class="fc-card-label">Answer</div>
+                      <div class="fc-card-text" id="fc-back-text"></div>
+                    </div>
+                  </div>
+                  <div class="fc-flip-hint">Click to flip</div>
+                </div>
+                <button class="fc-nav-btn" onclick="fcNext()">›</button>
+              </div>
+              <div class="fc-actions">
+                <button class="fc-action-btn fc-action-skip" onclick="fcSkip()">⟳ Skip</button>
+                <button class="fc-action-btn fc-action-master" id="fc-master-btn" onclick="toggleMastered()">★ Mark Mastered</button>
+                <button class="fc-action-btn fc-action-delete" onclick="deleteDeck()">🗑 Delete Deck</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-quiz" class="page hidden">
+        <div class="page-header">
+          <h1>Self Assessment</h1>
+          <p class="page-sub">Test your knowledge with AI-generated quizzes.</p>
+        </div>
+        <div id="quiz-setup" class="quiz-setup">
+          <div class="quiz-form-card">
+            <h2>Configure Quiz</h2>
+            <div class="field-group">
+              <label>Subject</label>
+              <select id="quiz-subject-select">
+                <option value="">Select a subject…</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label>Questions</label>
+                <input type="number" id="quiz-num" value="5" min="1" max="20"/>
+              </div>
+              <div class="field-group">
+                <label>Difficulty</label>
+                <select id="quiz-difficulty">
+                  <option value="easy">Easy</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label>Question Types</label>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="qt-mcq" checked/> Multiple Choice
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="qt-short"/> Short Answer
+                </label>
+              </div>
+            </div>
+            <div id="quiz-gen-error" class="form-error hidden"></div>
+            <button class="btn-primary btn-full" onclick="generateQuiz()" id="quiz-gen-btn">
+              <span>🎯 Generate Quiz</span>
+            </button>
+          </div>
+          <div class="quiz-stats-card">
+            <h2>Your Stats</h2>
+            <div id="quiz-stats-content" class="quiz-stats"></div>
+          </div>
+        </div>
+        <div id="quiz-active" class="quiz-active hidden">
+          <div class="quiz-progress">
+            <div class="quiz-pb"><div id="qpb-fill" class="quiz-pb-fill"></div></div>
+            <span id="q-counter">Question 1 / 5</span>
+          </div>
+          <div id="question-card" class="question-card"></div>
+          <div class="quiz-nav">
+            <button class="btn-ghost" id="prev-btn" onclick="prevQuestion()">← Prev</button>
+            <button class="btn-primary" id="next-btn" onclick="nextQuestion()">Next →</button>
+          </div>
+        </div>
+        <div id="quiz-results" class="quiz-results hidden">
+          <div class="result-hero">
+            <div class="result-score-ring">
+              <span id="result-score">0%</span>
+            </div>
+            <p id="result-feedback"></p>
+            <button class="btn-primary" onclick="resetQuiz()">Try Another Quiz</button>
+          </div>
+          <div id="result-details" class="result-details"></div>
+        </div>
+      </div>
+
+      <div id="page-dsa" class="page hidden">
+        <div class="dsa-layout">
+          <div class="dsa-sidebar">
+            <div class="dsa-progress-card">
+              <div class="dsa-level-badge">
+                <span id="dsa-level-num">1</span>
+              </div>
+              <div class="dsa-level-info">
+                <div class="dsa-level-name" id="dsa-level-name">Novice Coder</div>
+                <div class="dsa-xp-bar-wrap">
+                  <div id="dsa-xp-bar" class="dsa-xp-bar" style="width:0%"></div>
+                </div>
+                <div class="dsa-xp-text" id="dsa-xp-text">0 / 200 XP</div>
+              </div>
+            </div>
+            <div class="dsa-stats-row">
+              <div class="dsa-mini-stat">
+                <span id="dsa-streak">0</span>
+                <label>Streak</label>
+              </div>
+              <div class="dsa-mini-stat">
+                <span id="dsa-solved">0</span>
+                <label>Solved</label>
+              </div>
+            </div>
+            <div class="dsa-challenge-card">
+              <div class="dsa-challenge-head">
+                <span>Daily Challenge</span>
+                <button class="btn-ghost" onclick="refreshChallenge()">New</button>
+              </div>
+              <div id="challenge-content"></div>
+            </div>
+            <div class="dsa-topics">
+              <h4>Quick Topics</h4>
+              <div class="topic-chips">
+                <button class="topic-chip" onclick="askDSATopic('Arrays')">Arrays</button>
+                <button class="topic-chip" onclick="askDSATopic('Linked Lists')">Linked Lists</button>
+                <button class="topic-chip" onclick="askDSATopic('Binary Trees')">Trees</button>
+                <button class="topic-chip" onclick="askDSATopic('Dynamic Programming')">DP</button>
+                <button class="topic-chip" onclick="askDSATopic('Graphs')">Graphs</button>
+                <button class="topic-chip" onclick="askDSATopic('Sorting algorithms')">Sorting</button>
+                <button class="topic-chip" onclick="askDSATopic('Binary Search')">Binary Search</button>
+                <button class="topic-chip" onclick="askDSATopic('Stack and Queue')">Stack/Queue</button>
+              </div>
+            </div>
+          </div>
+          <div class="dsa-chat-area">
+            <div class="dsa-chat-header">
+              <h2>DSA Mentor</h2>
+              <button class="btn-ghost btn-sm" onclick="clearDSAHistory()">Clear chat</button>
+            </div>
+            <div id="dsa-messages" class="dsa-messages"></div>
+            <div class="dsa-input-area">
+              <textarea id="dsa-input" placeholder="Ask about any DSA concept, problem, or share your code…"
+                onkeydown="handleDSAKey(event)" oninput="autoResize(this)"></textarea>
+              <button class="btn-send" id="dsa-send-btn" onclick="sendDSAMessage()">↑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NOTES PAGE ──────────────────────────────────── -->
+      <div id="page-notes" class="page hidden">
+        <div class="page-header">
+          <div>
+            <h1>My Notes</h1>
+            <p class="page-sub">Capture and organize notes across all your subjects.</p>
+          </div>
+          <div class="page-header-actions">
+            <select id="notes-subject-filter" class="notes-filter-select" onchange="filterNotesBySubject()">
+              <option value="">All Subjects</option>
+            </select>
+            <button class="btn-primary" onclick="openGlobalNoteModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Note
+            </button>
+          </div>
+        </div>
+        <div id="notes-page-grid" class="notes-grid-page">
+          <p class="empty-state">Loading notes…</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="handleModalClick(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="note-modal-overlay" class="modal-overlay hidden" onclick="handleNoteModalClick(event)">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3 id="note-modal-title">New Note</h3>
+        <button class="modal-close" onclick="closeNoteModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label>Title</label>
+          <input type="text" id="note-title-input" placeholder="Note title…" maxlength="200"/>
+        </div>
+        <div class="field-group">
+          <label>Content</label>
+          <textarea id="note-content-input" placeholder="Write your note here…" rows="6"></textarea>
+        </div>
+        <div class="field-group">
+          <label>Color</label>
+          <div class="note-color-picker">
+            <button class="note-color-btn" style="background:#fef3c7" data-color="#fef3c7" onclick="selectNoteColor('#fef3c7', this)"></button>
+            <button class="note-color-btn" style="background:#dbeafe" data-color="#dbeafe" onclick="selectNoteColor('#dbeafe', this)"></button>
+            <button class="note-color-btn" style="background:#dcfce7" data-color="#dcfce7" onclick="selectNoteColor('#dcfce7', this)"></button>
+            <button class="note-color-btn" style="background:#fce7f3" data-color="#fce7f3" onclick="selectNoteColor('#fce7f3', this)"></button>
+            <button class="note-color-btn" style="background:#ede9fe" data-color="#ede9fe" onclick="selectNoteColor('#ede9fe', this)"></button>
+          </div>
+        </div>
+        <input type="hidden" id="note-color-value" value="#fef3c7"/>
+        <input type="hidden" id="note-edit-id" value=""/>
+        <button class="btn-primary btn-full" onclick="saveNote()" id="note-save-btn">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
