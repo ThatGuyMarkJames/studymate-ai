@@ -1,0 +1,23 @@
+# Exclude local and sensitive files from Docker build context
+.git
+.gitignore
+.env
+.venv
+venv
+env
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.DS_Store
+Thumbs.db
+node_modules
+uploads/
+database/*.sql
+!database/schema.sql
+*.md
+.dockerignore
+Dockerfile
+Procfile
+start.bat
+start.sh
