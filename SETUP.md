@@ -65,7 +65,7 @@ cp .env.example .env
 
 Your `.env` file:
 ```
-GROQ_API_KEY=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
+GROQ_API_KEY=your_groq_api_key_here
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
